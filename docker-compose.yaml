@@ -1,0 +1,25 @@
+version: "3"
+
+services:
+  postgres:
+    image: postgres
+    restart: always
+    env_file: .env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U  ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5450:5432"
+    volumes:
+      - ${POSTGRES_DATA}:/var/lib/postgresql/data
+
+  data:
+    build: data/.
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    links:
+      - postgres
